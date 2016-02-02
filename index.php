@@ -1,52 +1,174 @@
-<?php
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Alunos</title>
 
-try {
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
 
-  $config = parse_ini_file('config.ini');
+  </head>
+  <body>
 
-  $driver = $config['driver'];
-  $host = $config['host'];
-  $port = $config['port'];
-  $dbname = $config['dbname'];
-  $user = $config['user'];
-  $pass = $config['pass'];
+    <script type="text/javascript" src="js/jquery.js"></script>
+    <script type="text/javascript" src="js/bootstrap.js"></script>
 
-  $conn = new \PDO($driver.':host='.$host.';port='.$port.';dbname='.$dbname, $user, $pass);
+    <div class="container">
 
-} catch (\PDOException $e){
+      <div class="row">
+        <h1>CRUD</h1>
+      </div>
 
-  die("Erro Código: ".$e->getCode().":" .$e->getMessage());
+      <div class="row">
 
-}
+        <div class="col-md-5">
 
-$query = 'SELECT * FROM alunos';
+          <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+            Listar Alunos
+          </button>
+          <div class="collapse" id="collapseExample">
+            <div class="well">
 
-$stmt = $conn->query($query);
-$resultado = $stmt->fetchAll(PDO::FETCH_CLASS);
+              <?php
 
-echo 'Todos os alunos:</br></br>';
+                require_once 'connect.php';
 
-foreach ($resultado as $aluno) {
+                require_once 'Aluno.php';
 
-  echo $aluno->nome.'    ';
-  echo $aluno->nota.'</br>';
+                $aluno = new Aluno($conn);
 
-}
+                $x = 0;
 
-echo '</br>';
+                foreach ($aluno->listar() as $c) {
+
+                  ?>
+
+                  <div class="row">
+                    <div class="col-md-5">
+                      <?php echo $c['nome']; ?>
+                    </div>
+
+                    <div class="col-md-3">
+
+                    </div>
 
 
-$query2 = 'select * from alunos ORDER BY nota DESC LIMIT 3;';
+                      <button type="button" class="btn btn-success" data-toggle="modal" data-target="#exampleModal<?php echo $x; ?>">Alterar</button>
 
-$stmt2 = $conn->query($query2);
-$resultado2 = $stmt2->fetchAll(PDO::FETCH_CLASS);
+                      <div class="modal fade" id="exampleModal<?php echo $x; ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+                        <div class="modal-dialog" role="document">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                              <h4 class="modal-title" id="exampleModalLabel"><?php echo $c['id']; ?></h4>
+                            </div>
+                              <div class="modal-body">
+                                <form action="altera.php" method="post">
+                                <div class="form-group">
+                                  <input hidden type="hidden" class="form-control" id="id" name="id" value="<?php echo $c['id']; ?>">
+                                  <label class="control-label">Nome:</label>
+                                  <input type="text" class="form-control" id="nome" name="nome" value="<?php echo $c['nome']; ?>">
+                                </div>
+                                <div class="form-group">
+                                  <label class="control-label">Nota:</label>
+                                  <input type="number" class="form-control" id="nota" name="nota" value="<?php echo $c['nota']; ?>">
+                                </div>
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
+                                <button type="submit" class="btn btn-success">Alterar</button>
+                              </div>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
 
-echo 'Alunos com as 3 maiores notas:</br></br>';
 
-  # code...
-foreach ($resultado2 as $aluno2) {
 
-  echo $aluno2->nome.'    ';
-  echo $aluno2->nota.'</br>';
 
-}
+                      <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#exampleModal2<?php echo $x; ?>">Deletar</button>
+
+                      <div class="modal fade" id="exampleModal2<?php echo $x; ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+                        <div class="modal-dialog" role="document">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                              <h4 class="modal-title" id="exampleModalLabel">Tem certeza que deseja deletar o aluno <?php echo $c['id']; ?> ?</h4>
+                            </div>
+                              <div class="modal-body">
+                                <form action="deleta.php" method="post">
+                                <div class="form-group">
+                                  <input hidden type="hidden" class="form-control" id="id" name="id" value="<?php echo $c['id']; ?>">
+                                  <label class="control-label">Nome:</label> <?php echo $c['nome']; ?>
+                                  <input type="hidden" class="form-control" id="nome" name="nome" value="<?php echo $c['nome']; ?>">
+                                </div>
+                                <div class="form-group">
+                                  <label class="control-label">Nota:</label> <?php echo $c['nota']; ?>
+                                  <input type="hidden" class="form-control" id="nota" name="nota" value="<?php echo $c['nota']; ?>">
+                                </div>
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
+                                <button type="submit" class="btn btn-danger">Deletar</button>
+                              </div>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+
+
+                  </div>
+
+                  <?php
+
+                  $x++;
+
+                }
+
+              ?>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+
+    </div>
+
+    <div class="col-md-1">
+      <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">Cadastrar Aluno</button>
+
+      <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title" id="exampleModalLabel">Cadastrar Aluno</h4>
+            </div>
+              <div class="modal-body">
+                <form action="insere.php" method="post">
+                <div class="form-group">
+                  <label class="control-label">Nome:</label>
+                  <input type="text" class="form-control" id="nome" name="nome">
+                </div>
+                <div class="form-group">
+                  <label class="control-label">Nota:</label>
+                  <input type="number" class="form-control" id="nota" name="nota">
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
+                <button type="submit" class="btn btn-primary">Cadastrar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+
+    </div>
+
+  </body>
+</html>

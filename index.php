@@ -1,3 +1,12 @@
+<?php
+
+  if (isset($_COOKIE['login']) || isset($_SESSION['login'])){
+    $estado = 1;
+  } else{
+    $estado = 0;
+  }
+
+?>
 <!DOCTYPE html>
 <html>
   <head>
@@ -30,15 +39,16 @@
 
               <?php
 
-                require_once 'connect.php';
+                require_once 'config/connect.php';
+                require_once 'class/ServiceDB.php';
+                require_once 'class/Aluno.php';
 
-                require_once 'Aluno.php';
-
-                $aluno = new Aluno($conn);
+                $aluno = new Aluno();
+                $crud = new ServiceDB($conn, $aluno);
 
                 $x = 0;
 
-                foreach ($aluno->listar() as $c) {
+                foreach ($crud->listar() as $c) {
 
                   ?>
 
@@ -51,6 +61,8 @@
 
                     </div>
 
+                    <?php if ($estado == 1){ ?>
+
 
                       <button type="button" class="btn btn-success" data-toggle="modal" data-target="#exampleModal<?php echo $x; ?>">Alterar</button>
 
@@ -62,7 +74,7 @@
                               <h4 class="modal-title" id="exampleModalLabel"><?php echo $c['id']; ?></h4>
                             </div>
                               <div class="modal-body">
-                                <form action="altera.php" method="post">
+                                <form action="midd/Aluno/altera.php" method="post">
                                 <div class="form-group">
                                   <input hidden type="hidden" class="form-control" id="id" name="id" value="<?php echo $c['id']; ?>">
                                   <label class="control-label">Nome:</label>
@@ -82,9 +94,6 @@
                         </div>
                       </div>
 
-
-
-
                       <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#exampleModal2<?php echo $x; ?>">Deletar</button>
 
                       <div class="modal fade" id="exampleModal2<?php echo $x; ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
@@ -95,7 +104,7 @@
                               <h4 class="modal-title" id="exampleModalLabel">Tem certeza que deseja deletar o aluno <?php echo $c['id']; ?> ?</h4>
                             </div>
                               <div class="modal-body">
-                                <form action="deleta.php" method="post">
+                                <form action="midd/Aluno/deleta.php" method="post">
                                 <div class="form-group">
                                   <input hidden type="hidden" class="form-control" id="id" name="id" value="<?php echo $c['id']; ?>">
                                   <label class="control-label">Nome:</label> <?php echo $c['nome']; ?>
@@ -115,6 +124,7 @@
                         </div>
                       </div>
 
+                    <?php } ?>
 
                   </div>
 
@@ -130,12 +140,16 @@
       </div>
     </div>
 
-    <div class="col-md-6">
+    <div class="col-md-4">
 
     </div>
 
-    <div class="col-md-1">
+    <?php if ($estado == 1){ ?>
+
+    <div class="col-md-3">
+
       <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">Cadastrar Aluno</button>
+      <a href="logout.php" class="btn btn-default">Sair</a>
 
       <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
         <div class="modal-dialog" role="document">
@@ -145,7 +159,7 @@
               <h4 class="modal-title" id="exampleModalLabel">Cadastrar Aluno</h4>
             </div>
               <div class="modal-body">
-                <form action="insere.php" method="post">
+                <form action="midd/Aluno/insere.php" method="post">
                 <div class="form-group">
                   <label class="control-label">Nome:</label>
                   <input type="text" class="form-control" id="nome" name="nome">
@@ -164,6 +178,41 @@
         </div>
       </div>
     </div>
+
+    <?php } else { ?>
+
+      <div class="col-md-3">
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">Login</button>
+
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Login para gerenciar alunos</h4>
+              </div>
+                <div class="modal-body">
+                  <form action="login.php" method="post">
+                  <div class="form-group">
+                    <label class="control-label">Login:</label>
+                    <input type="text" class="form-control" id="login" name="login">
+                  </div>
+                  <div class="form-group">
+                    <label class="control-label">Senha:</label>
+                    <input type="password" class="form-control" id="senha" name="senha">
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
+                  <button type="submit" class="btn btn-primary">Logar</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    <?php } ?>
 
   </div>
 
